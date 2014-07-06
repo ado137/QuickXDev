@@ -58,38 +58,22 @@ def checkRoot():
     return quick_cocos2dx_root
 
 
-class LuaNewFileCommand(sublime_plugin.WindowCommand):
-    def run(self, dirs):
-        self.window.run_command("hide_panel")
-        title = "untitle"
-        on_done = functools.partial(self.on_done, dirs[0])
-        v = self.window.show_input_panel(
-            "File Name:", title + ".lua", on_done, None, None)
-        v.sel().clear()
-        v.sel().add(sublime.Region(0, len(title)))
+def getProjectPath(dir):
+    find_index = dir.find("scripts")
+    
+    if find_index == -1:
+        sublime.error_message("The file '{}' not in sctipts path.".format(dir))
+        return ""
 
-    def on_done(self, path, name):
-        filePath = os.path.join(path, name)
-        if os.path.exists(filePath):
-            sublime.error_message("Unable to create file, file exists.")
-        else:
-            code = luaTemplate
-            # add attribute
-            settings = helper.loadSettings("QuickXDev")
-            format = settings.get("date_format", "%Y-%m-%d %H:%M:%S")
-            date = datetime.datetime.now().strftime(format)
-            code = code.replace("${date}", date)
-            author=settings.get("author", "Your Name")
-            code = code.replace("${author}", author)
-            # save
-            helper.writeFile(filePath, code)
-            v=sublime.active_window().open_file(filePath)
-            # cursor
-            v.run_command("insert_snippet",{"contents":code})
-            sublime.status_message("Lua file create success!")
+    return dir[:find_index - 1]
 
-    def is_enabled(self, dirs):
-        return len(dirs) == 1
+def getAndroidPath(dir):
+    proj_path = getProjectPath(dir)
+
+    if proj_path == "":
+        return ""
+
+    return proj_path+"/proj.android"
 
 
 def run_player_with_path(parent, quick_cocos2dx_root, script_path):
@@ -153,6 +137,41 @@ def run_player_with_path(parent, quick_cocos2dx_root, script_path):
     elif sublime.platform()=="windows":
         parent.process=subprocess.Popen(args)
 
+
+class LuaNewFileCommand(sublime_plugin.WindowCommand):
+    def run(self, dirs):
+        self.window.run_command("hide_panel")
+        title = "untitle"
+        on_done = functools.partial(self.on_done, dirs[0])
+        v = self.window.show_input_panel(
+            "File Name:", title + ".lua", on_done, None, None)
+        v.sel().clear()
+        v.sel().add(sublime.Region(0, len(title)))
+
+    def on_done(self, path, name):
+        filePath = os.path.join(path, name)
+        if os.path.exists(filePath):
+            sublime.error_message("Unable to create file, file exists.")
+        else:
+            code = luaTemplate
+            # add attribute
+            settings = helper.loadSettings("QuickXDev")
+            format = settings.get("date_format", "%Y-%m-%d %H:%M:%S")
+            date = datetime.datetime.now().strftime(format)
+            code = code.replace("${date}", date)
+            author=settings.get("author", "Your Name")
+            code = code.replace("${author}", author)
+            # save
+            helper.writeFile(filePath, code)
+            v=sublime.active_window().open_file(filePath)
+            # cursor
+            v.run_command("insert_snippet",{"contents":code})
+            sublime.status_message("Lua file create success!")
+
+    def is_enabled(self, dirs):
+        return len(dirs) == 1
+
+
 class QuickxSmartRunWithPlayerCommand(sublime_plugin.TextCommand):
     def __init__(self,window):
         super(QuickxSmartRunWithPlayerCommand,self).__init__(window)
@@ -162,18 +181,16 @@ class QuickxSmartRunWithPlayerCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         # find script path
         file_path = self.view.file_name()
-        find_index = file_path.find("scripts")
-        if find_index == -1:
-            sublime.error_message("The file '{}' not in sctipt path.".format(file_path))
-            return
+        scripts_path = getScriptsPath(file_path)
 
-        sctipt_path = file_path[:find_index+len("scripts")]
+        if scripts_path == "":
+            return
 
         # root
         quick_cocos2dx_root = checkRoot()
         if not quick_cocos2dx_root:
             return
-        run_player_with_path(self, quick_cocos2dx_root, sctipt_path)
+        run_player_with_path(self, quick_cocos2dx_root, scripts_path)
 
 
 class QuickxRunWithPlayerCommand(sublime_plugin.WindowCommand):
@@ -331,6 +348,54 @@ class QuickxCreateNewProjectCommand(sublime_plugin.WindowCommand):
 
     def is_visible(self, dirs):
         return self.is_enabled(dirs)
+
+class QuickxRunWithAndroidCommand(sublime_plugin.TextCommand):
+    
+    def run(self, edit):
+        # find script path
+        file_path = self.view.file_name()
+        android_path = getAndroidPath(file_path)
+
+        if android_path == "":
+            return
+            
+        cmdPath=""
+        if sublime.platform()=="osx":
+            cmdPath=android_path+"/build_native.sh"
+        elif sublime.platform()=="windows":
+            cmdPath=android_path+"/build_native.bat"
+        
+        if not os.path.exists(cmdPath):
+            sublime.error_message("build_native no exists")
+            return
+
+        args=["sh",cmdPath]
+        process = subprocess.Popen(
+            args,
+            # shell = True,
+            # env={"ANDROID_NDK_ROOT":"user/fuck"},
+            # cwd = android_path,
+            stdin=subprocess.PIPE, 
+            stdout=subprocess.PIPE, 
+            stderr=subprocess.STDOUT
+        )
+
+        proc_env = os.environ.copy()
+        for ev in proc_env:
+            print(ev)
+
+        stdout=process.communicate()
+        for o in stdout:
+            if o :
+                lines = o.decode().split("\n")
+                for line in lines:
+                    print(line)
+
+        print("------------------------222")
+
+
+
+    
 
 class QuickxCompileScriptsCommand(sublime_plugin.WindowCommand):
     def run(self, dirs):
