@@ -74,23 +74,23 @@ def getEnvironment():
 
 	return env
 
-
-def getProjectPath(dir):
+def getNamePath(dir, name, hard):
 	if not dir:
 		sublime.error_message("Invalide path:'{}'".format(dir))
 		return ""
 
-	find_index = dir.find("scripts")
+	find_index = dir.find(name)
 
 	if find_index == -1:
-		sublime.error_message("The file '{}' not in sctipts path.".format(dir))
+		if hard:
+			sublime.error_message("The file '{0}' not in {1} path.".format(dir, name))
 		return ""
 
 	return dir[:find_index - 1]
 
 
 def getScrtptsPath(dir):
-	proj_path = getProjectPath(dir)
+	proj_path = getNamePath(dir, "scripts", True)
 
 	if proj_path == "":
 		return ""
@@ -99,12 +99,16 @@ def getScrtptsPath(dir):
 
 
 def getAndroidPath(dir):
-	proj_path = getProjectPath(dir)
+	proj_path = getNamePath(dir, "proj.android", False)
+
+	if proj_path == "":
+		proj_path = getNamePath(dir, "scripts", True)
 
 	if proj_path == "":
 		return ""
 
 	return proj_path+"/proj.android"
+
 
 class OutputPanel(object):
 
@@ -428,7 +432,7 @@ class QuickxRunWithAndroidCommand(sublime_plugin.TextCommand):
 		# find script path
 		file_path = self.view.file_name()
 		android_path = getAndroidPath(file_path)
-
+		print(android_path)
 		if android_path == "":
 			return
 
