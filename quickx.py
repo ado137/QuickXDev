@@ -106,13 +106,40 @@ def getAndroidPath(dir):
 
 	return proj_path+"/proj.android"
 
-def print_subprocess_stdout(proc):
+class OutputPanel(object):
+
+    def __init__(self, window, name, scheme):
+        self.window = window
+        self.panel = window.create_output_panel(name)
+        self.name = name
+
+        if scheme:
+        	self.panel.settings().set("color_scheme", scheme)
+
+    def show(self):
+        self.window.run_command("show_panel", {"panel": "output."+self.name})
+
+    def hide(self):
+        self.window.run_command("hide_panel", {"panel": "output."+self.name})
+
+    def write(self, characters):
+        self.panel.set_read_only(False)
+        self.panel.run_command('append', {'characters': characters})
+        self.panel.set_read_only(True)
+
+    def size(self):
+        return self.panel.size()
+
+def print_subprocess_stdout(proc,call_func):
 	while True:
-		next_line = proc.stdout.readline().decode().replace('\n','')
+		next_line = proc.stdout.readline().decode()
 		if next_line == '' and proc.poll() != None:
 			break
+		if call_func:
+			call_func(next_line)
+		else:
+			print(next_line)
 
-		print(next_line)
 		time.sleep(0.1)
 
 def run_player_with_path(parent, quick_cocos2dx_root, script_path):
@@ -415,8 +442,6 @@ class QuickxRunWithAndroidCommand(sublime_plugin.TextCommand):
 			sublime.error_message("build_native no exists")
 			return
 
-		print("------------------------ build_native ------------------------")
-
 		args=["sh",cmdPath]
 		process = subprocess.Popen(
 			args,
@@ -428,15 +453,15 @@ class QuickxRunWithAndroidCommand(sublime_plugin.TextCommand):
 
 		print("pid: ",process.pid)
 
+		self.panel = OutputPanel(self.view.window(), "build_native", self.view.settings().get('color_scheme'))
+		self.panel.show()
 
-		t1 = Thread(target=print_subprocess_stdout,args=(process,))#指定目标函数，传入参数，这里参数也是元组
+		def call_func(msg):
+			# print(msg)
+			self.panel.write(msg)
+
+		t1 = Thread(target=print_subprocess_stdout,args=(process,call_func))#指定目标函数，传入参数，这里参数也是元组
 		t1.start()
-		# stdout=process.communicate()
-		# for o in stdout:
-		# 	if o :
-		# 		lines = o.decode().split("\n")
-		# 		for line in lines:
-		# 			print(line)
 
 
 class QuickxCompileScriptsCommand(sublime_plugin.WindowCommand):
