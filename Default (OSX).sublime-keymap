@@ -1,5 +1,5 @@
 [
     { "keys": ["ctrl+shift+g"], "command": "quickx_goto_definition" },
-    { "keys": ["super+ctrl+r"], "command": "quickx_smart_run_with_player" },
-    { "keys": ["super+ctrl+e"], "command": "quickx_run_with_android" }
+	{ "keys": ["super+ctrl+r"], "command": "quickx_smart_run_with_player" },
+    { "keys": ["super+ctrl+b"], "command": "quickx_run_with_android" }
 ]

@@ -15,6 +15,7 @@ import subprocess
 import sys
 import time
 import codecs
+from threading import Thread
 try:
 	import helper
 	import rebuild
@@ -73,14 +74,29 @@ def getEnvironment():
 
 	return env
 
+
 def getProjectPath(dir):
+	if not dir:
+		sublime.error_message("Invalide path:'{}'".format(dir))
+		return ""
+
 	find_index = dir.find("scripts")
-	
+
 	if find_index == -1:
 		sublime.error_message("The file '{}' not in sctipts path.".format(dir))
 		return ""
 
 	return dir[:find_index - 1]
+
+
+def getScrtptsPath(dir):
+	proj_path = getProjectPath(dir)
+
+	if proj_path == "":
+		return ""
+
+	return proj_path+"/scripts"
+
 
 def getAndroidPath(dir):
 	proj_path = getProjectPath(dir)
@@ -90,6 +106,14 @@ def getAndroidPath(dir):
 
 	return proj_path+"/proj.android"
 
+def print_subprocess_stdout(proc):
+	while True:
+		next_line = proc.stdout.readline().decode().replace('\n','')
+		if next_line == '' and proc.poll() != None:
+			break
+
+		print(next_line)
+		time.sleep(0.1)
 
 def run_player_with_path(parent, quick_cocos2dx_root, script_path):
 	# player path for platform
@@ -196,7 +220,7 @@ class QuickxSmartRunWithPlayerCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
 		# find script path
 		file_path = self.view.file_name()
-		scripts_path = getScriptsPath(file_path)
+		scripts_path = getScrtptsPath(file_path)
 
 		if scripts_path == "":
 			return
@@ -315,6 +339,7 @@ class QuickxRebuildUserDefinitionCommand(sublime_plugin.WindowCommand):
 	def is_visible(self, dirs):
 		return self.is_enabled(dirs)
 
+
 class QuickxCreateNewProjectCommand(sublime_plugin.WindowCommand):
 	def run(self, dirs):
 		quick_cocos2dx_root = checkRoot()
@@ -364,8 +389,9 @@ class QuickxCreateNewProjectCommand(sublime_plugin.WindowCommand):
 	def is_visible(self, dirs):
 		return self.is_enabled(dirs)
 
+
 class QuickxRunWithAndroidCommand(sublime_plugin.TextCommand):
-	
+
 	def run(self, edit):
 		# get environment
 		env = getEnvironment()
@@ -378,57 +404,40 @@ class QuickxRunWithAndroidCommand(sublime_plugin.TextCommand):
 
 		if android_path == "":
 			return
-			
+
 		cmdPath=""
 		if sublime.platform()=="osx":
 			cmdPath=android_path+"/build_native.sh"
 		elif sublime.platform()=="windows":
 			cmdPath=android_path+"/build_native.bat"
-		
+
 		if not os.path.exists(cmdPath):
 			sublime.error_message("build_native no exists")
 			return
 
-		print("------------------------build_native start------------------------")
+		print("------------------------ build_native ------------------------")
 
 		args=["sh",cmdPath]
 		process = subprocess.Popen(
 			args,
 			env=env,
-			stdin=subprocess.PIPE, 
-			stdout=subprocess.PIPE, 
+			stdin=subprocess.PIPE,
+			stdout=subprocess.PIPE,
 			stderr=subprocess.STDOUT
 		)
 
-		stdout=process.communicate()
-		for o in stdout:
-			if o :
-				lines = o.decode().split("\n")
-				for line in lines:
-					print(line)
+		print("pid: ",process.pid)
 
-		print("------------------------build_native done------------------------\n\n")
 
-		print("------------------------adb install begin------------------------")
-		args=["sh",cmdPath]
-				process = subprocess.Popen(
-					args,
-					env=env,
-					stdin=subprocess.PIPE, 
-					stdout=subprocess.PIPE, 
-					stderr=subprocess.STDOUT
-				)
+		t1 = Thread(target=print_subprocess_stdout,args=(process,))#指定目标函数，传入参数，这里参数也是元组
+		t1.start()
+		# stdout=process.communicate()
+		# for o in stdout:
+		# 	if o :
+		# 		lines = o.decode().split("\n")
+		# 		for line in lines:
+		# 			print(line)
 
-		stdout=process.communicate()
-		for o in stdout:
-			if o :
-				lines = o.decode().split("\n")
-				for line in lines:
-					print(line)
-
-		print("------------------------build_native done------------------------")
-
-	
 
 class QuickxCompileScriptsCommand(sublime_plugin.WindowCommand):
 	def run(self, dirs):
@@ -482,6 +491,7 @@ class QuickxCompileScriptsCommand(sublime_plugin.WindowCommand):
 
 	def is_visible(self, dirs):
 		return self.is_enabled(dirs)
+
 
 class QuickxListener(sublime_plugin.EventListener):
 	def __init__(self):
