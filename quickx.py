@@ -59,6 +59,23 @@ def checkRoot():
 	return quick_cocos2dx_root
 
 
+
+def getProjectRootPath(filepath):
+	root_path = ""
+	keys = ("proj.android/","proj.ios/","proj.mac/","proj.win32/","res/","scripts/","sources/")
+	for key in keys:
+		find_index = filepath.find(key)
+		if find_index != -1:
+			root_path = filepath[:find_index - 1]
+			if os.path.isfile(root_path+"/scripts/main.lua"):
+				break
+
+			root_path = ""
+
+	return root_path
+
+
+
 def getEnvironment():
 	settings = helper.loadSettings("QuickXDev")
 
@@ -251,16 +268,17 @@ class QuickxSmartRunWithPlayerCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
 		# find script path
 		file_path = self.view.file_name()
-		scripts_path = getScrtptsPath(file_path)
-
-		if scripts_path == "":
+		project_root = getProjectRootPath(file_path)
+		if project_root == "":
+			sublime.error_message("makesure the file '{0}' in your quickx project!".format(file_path))
 			return
 
 		# root
 		quick_cocos2dx_root = checkRoot()
 		if not quick_cocos2dx_root:
 			return
-		run_player_with_path(self, quick_cocos2dx_root, scripts_path)
+
+		run_player_with_path(self, quick_cocos2dx_root, project_root+"/scripts")
 
 
 class QuickxRunWithPlayerCommand(sublime_plugin.WindowCommand):
@@ -431,10 +449,14 @@ class QuickxRunWithAndroidCommand(sublime_plugin.TextCommand):
 
 		# find script path
 		file_path = self.view.file_name()
-		android_path = getAndroidPath(file_path)
-		print(android_path)
-		if android_path == "":
+		project_root = getProjectRootPath(file_path)
+
+		if project_root == "":
+			sublime.error_message("makesure the file '{0}' in your quickx project!".format(file_path))
 			return
+
+		android_path = project_root+"/proj.android"
+		print(android_path)
 
 		cmdPath=""
 		if sublime.platform()=="osx":
@@ -443,7 +465,7 @@ class QuickxRunWithAndroidCommand(sublime_plugin.TextCommand):
 			cmdPath=android_path+"/build_native.bat"
 
 		if not os.path.exists(cmdPath):
-			sublime.error_message("build_native no exists")
+			sublime.error_message("{0} no exists".format(cmdPath))
 			return
 
 		args=["sh",cmdPath]
