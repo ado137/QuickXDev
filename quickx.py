@@ -129,27 +129,27 @@ def getAndroidPath(dir):
 
 class OutputPanel(object):
 
-    def __init__(self, window, name, scheme):
-        self.window = window
-        self.panel = window.create_output_panel(name)
-        self.name = name
+	def __init__(self, window, name, scheme):
+		self.window = window
+		self.panel = window.create_output_panel(name)
+		self.name = name
 
-        if scheme:
-        	self.panel.settings().set("color_scheme", scheme)
+		if scheme:
+			self.panel.settings().set("color_scheme", scheme)
 
-    def show(self):
-        self.window.run_command("show_panel", {"panel": "output."+self.name})
+	def show(self):
+		self.window.run_command("show_panel", {"panel": "output."+self.name})
 
-    def hide(self):
-        self.window.run_command("hide_panel", {"panel": "output."+self.name})
+	def hide(self):
+		self.window.run_command("hide_panel", {"panel": "output."+self.name})
 
-    def write(self, characters):
-        self.panel.set_read_only(False)
-        self.panel.run_command('append', {'characters': characters})
-        self.panel.set_read_only(True)
+	def write(self, characters):
+		self.panel.set_read_only(False)
+		self.panel.run_command('append', {'characters': characters})
+		self.panel.set_read_only(True)
 
-    def size(self):
-        return self.panel.size()
+	def size(self):
+		return self.panel.size()
 
 def print_subprocess_stdout(proc,call_func):
 	while True:
@@ -488,6 +488,42 @@ class QuickxRunWithAndroidCommand(sublime_plugin.TextCommand):
 
 		t1 = Thread(target=print_subprocess_stdout,args=(process,call_func))#指定目标函数，传入参数，这里参数也是元组
 		t1.start()
+
+
+class QuickxGetClassSignCommand(sublime_plugin.TextCommand):
+	def run(self, edit):
+		file_path = self.view.file_name()
+		head, tail = os.path.split(file_path)
+		print(head)
+		print(tail)
+		file_name = tail.replace(".java","")
+		classes_apth = head.replace("proj.android/src/","proj.android/bin/classes/")
+		print(file_name)
+		print(classes_apth)
+		args=["javap", "-s", "-p", "-classpath", classes_apth, file_name]
+		process = subprocess.Popen(
+			args,
+			# env=env,
+			stdin=subprocess.PIPE,
+			stdout=subprocess.PIPE,
+			stderr=subprocess.STDOUT
+		)
+
+		self.panel = OutputPanel(self.view.window(), "get_class_sign", self.view.settings().get('color_scheme'))
+		self.panel.show()
+
+		def call_func(msg):
+			# print(msg)
+			self.panel.write(msg)
+
+		t1 = Thread(target=print_subprocess_stdout,args=(process,call_func))#指定目标函数，传入参数，这里参数也是元组
+		t1.start()
+
+
+
+	def is_enabled(self):
+		return helper.checkFileExt(self.view.file_name(),"java")
+
 
 
 class QuickxCompileScriptsCommand(sublime_plugin.WindowCommand):

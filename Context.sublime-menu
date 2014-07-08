@@ -1,4 +1,5 @@
 [
     { "command": "quickx_goto_definition", "caption": "Goto Definition" },
+    { "command": "quickx_get_class_sign", "caption": "Get Class Sign" },
     { "caption": "-", "id": "end" }
 ]
