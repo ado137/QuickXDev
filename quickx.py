@@ -128,14 +128,16 @@ def getAndroidPath(dir):
 
 
 class OutputPanel(object):
-
-	def __init__(self, window, name, scheme):
+	def __init__(self, window, name, scheme = None, syntax_file = None):
 		self.window = window
 		self.panel = window.create_output_panel(name)
 		self.name = name
 
 		if scheme:
 			self.panel.settings().set("color_scheme", scheme)
+
+		if syntax_file:
+			self.panel.set_syntax_file(syntax_file)
 
 	def show(self):
 		self.window.run_command("show_panel", {"panel": "output."+self.name})
@@ -151,7 +153,7 @@ class OutputPanel(object):
 	def size(self):
 		return self.panel.size()
 
-def print_subprocess_stdout(proc,call_func):
+def print_subprocess_stdout(proc,call_func, sleep = 0.05):
 	while True:
 		next_line = proc.stdout.readline().decode()
 		if next_line == '' and proc.poll() != None:
@@ -161,7 +163,7 @@ def print_subprocess_stdout(proc,call_func):
 		else:
 			print(next_line)
 
-		time.sleep(0.1)
+		time.sleep(sleep)
 
 def run_player_with_path(parent, quick_cocos2dx_root, script_path):
 	# player path for platform
@@ -263,7 +265,6 @@ class QuickxSmartRunWithPlayerCommand(sublime_plugin.TextCommand):
 	def __init__(self,window):
 		super(QuickxSmartRunWithPlayerCommand,self).__init__(window)
 		self.process=None
-
 
 	def run(self, edit):
 		# find script path
@@ -440,7 +441,6 @@ class QuickxCreateNewProjectCommand(sublime_plugin.WindowCommand):
 
 
 class QuickxRunWithAndroidCommand(sublime_plugin.TextCommand):
-
 	def run(self, edit):
 		# get environment
 		env = getEnvironment()
@@ -486,7 +486,7 @@ class QuickxRunWithAndroidCommand(sublime_plugin.TextCommand):
 			# print(msg)
 			self.panel.write(msg)
 
-		t1 = Thread(target=print_subprocess_stdout,args=(process,call_func))#指定目标函数，传入参数，这里参数也是元组
+		t1 = Thread(target=print_subprocess_stdout,args=(process,call_func,0.05))#指定目标函数，传入参数，这里参数也是元组
 		t1.start()
 
 
@@ -503,23 +503,20 @@ class QuickxGetClassSignCommand(sublime_plugin.TextCommand):
 		args=["javap", "-s", "-p", "-classpath", classes_apth, file_name]
 		process = subprocess.Popen(
 			args,
-			# env=env,
 			stdin=subprocess.PIPE,
 			stdout=subprocess.PIPE,
 			stderr=subprocess.STDOUT
 		)
 
-		self.panel = OutputPanel(self.view.window(), "get_class_sign", self.view.settings().get('color_scheme'))
+		self.panel = OutputPanel(self.view.window(), "get_class_sign", self.view.settings().get('color_scheme'), "Packages/Java/Java.tmLanguage")
 		self.panel.show()
 
 		def call_func(msg):
 			# print(msg)
 			self.panel.write(msg)
 
-		t1 = Thread(target=print_subprocess_stdout,args=(process,call_func))#指定目标函数，传入参数，这里参数也是元组
+		t1 = Thread(target=print_subprocess_stdout,args=(process,call_func,0.05))#指定目标函数，传入参数，这里参数也是元组
 		t1.start()
-
-
 
 	def is_enabled(self):
 		return helper.checkFileExt(self.view.file_name(),"java")
