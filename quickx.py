@@ -166,8 +166,29 @@ def print_subprocess_stdout(proc,call_func, sleep = 0.05):
 		time.sleep(sleep)
 
 class InsertMyText(sublime_plugin.TextCommand):
-  def run(self, edit, args):
-    self.view.insert(edit, self.view.size(), args['text'])
+	def run(self, edit, args):
+		self.view.insert(edit, self.view.size(), args['text'])
+
+
+class MySpecialDoubleclickCommand(sublime_plugin.TextCommand):
+	def run(self, edit):
+		file_path, file_name = os.path.split(self.view.file_name())
+		print(file_path, edit)
+		line = ""
+		for region in self.view.sel():
+			if not region.empty():
+				line = self.view.substr(self.view.line(region.a))
+				break
+
+		print("line:",line)
+		self.view.window().open_file("/Volumes/DATA/quickx-utils/autolayout/tests/debug.log:20",sublime.ENCODED_POSITION)
+		if file_name == "debug.log":
+			# print(args)
+			pass
+		else:
+			# self.view.run_command("expand_selection", {"to": "word"}) 
+			pass
+
 
 def run_player_with_path(parent, quick_cocos2dx_root, script_path):
 	# player path for platform
@@ -231,15 +252,16 @@ def run_player_with_path(parent, quick_cocos2dx_root, script_path):
 		parent.process=subprocess.Popen(args, stdout = subprocess.PIPE)
 
 		parent.view = parent.view.window().new_file()
+		parent.view.set_syntax_file("Packages/Java/Java.tmLanguage")
+		parent.view.set_name("debug.log")
 		# parent.view.show()
 		# parent.panel = OutputPanel(parent.view.window(), "get_class_sign", parent.view.settings().get('color_scheme'), "Packages/Java/Java.tmLanguage")
-		# parent.panel.show()
+		# parent.panel.show()ch
 
 		def call_func(msg):
 			# print(msg)
 			parent.view.run_command("insert_my_text", {"args":{'text':msg}})
 			parent.view.show(parent.view.size())
-			parent.view.set_syntax_file("Packages/Java/Java.tmLanguage")
 
 
 		t1 = Thread(target=print_subprocess_stdout,args=(parent.process,call_func,0.00))#指定目标函数，传入参数，这里参数也是元组
