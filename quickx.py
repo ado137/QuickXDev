@@ -165,13 +165,17 @@ def print_subprocess_stdout(proc,call_func, sleep = 0.05):
 
 		time.sleep(sleep)
 
+class InsertMyText(sublime_plugin.TextCommand):
+  def run(self, edit, args):
+    self.view.insert(edit, self.view.size(), args['text'])
+
 def run_player_with_path(parent, quick_cocos2dx_root, script_path):
 	# player path for platform
 	playerPath=""
 	if sublime.platform()=="osx":
-		playerPath=quick_cocos2dx_root+"/player/mac/quick-x-player.app/Contents/MacOS/quick-x-player"
+		playerPath=quick_cocos2dx_root+"/player/bin/mac/quick-x-player.app/Contents/MacOS/quick-x-player"
 	elif sublime.platform()=="windows":
-		playerPath=quick_cocos2dx_root+"/player/win/quick-x-player.exe"
+		playerPath=quick_cocos2dx_root+"/player/bin/win/quick-x-player.exe"
 	if playerPath=="" or not os.path.exists(playerPath):
 		sublime.error_message("player no exists")
 		return
@@ -202,8 +206,9 @@ def run_player_with_path(parent, quick_cocos2dx_root, script_path):
 						args.append("-disable-write-debug-log")
 						args.append("-console")
 					else:
-						args.append("-write-debug-log")
-						args.append("-console")
+						args.append("-disable-console")
+						# args.append("-write-debug-log")
+						# args.append("-console")
 				# resolution
 				m=re.match("^CONFIG_SCREEN_WIDTH\s*=\s*(\d+)",line)
 				if m:
@@ -222,7 +227,22 @@ def run_player_with_path(parent, quick_cocos2dx_root, script_path):
 		except Exception:
 			pass
 	if sublime.platform()=="osx":
-		parent.process=subprocess.Popen(args)
+		parent.process=subprocess.Popen(args, stdout = subprocess.PIPE)
+
+		parent.view = parent.view.window().new_file()
+		# parent.view.show()
+		# parent.panel = OutputPanel(parent.view.window(), "get_class_sign", parent.view.settings().get('color_scheme'), "Packages/Java/Java.tmLanguage")
+		# parent.panel.show()
+
+		def call_func(msg):
+			# print(msg)
+			parent.view.run_command("insert_my_text", {"args":{'text':msg}})
+			parent.view.show(parent.view.size())
+			parent.view.set_syntax_file("Packages/Java/Java.tmLanguage")
+
+
+		t1 = Thread(target=print_subprocess_stdout,args=(parent.process,call_func,0.00))#指定目标函数，传入参数，这里参数也是元组
+		t1.start()
 	elif sublime.platform()=="windows":
 		parent.process=subprocess.Popen(args)
 
@@ -250,6 +270,9 @@ class LuaNewFileCommand(sublime_plugin.WindowCommand):
 			code = code.replace("${date}", date)
 			author=settings.get("author", "Your Name")
 			code = code.replace("${author}", author)
+
+			code = "{code}\n\nlocal {name} = class(\"{name}\")\n\nfunction {name}:ctor()\n\nend\n\nreturn {name}".format(name = name.replace(".lua",""),code=code)
+			
 			# save
 			helper.writeFile(filePath, code)
 			v=sublime.active_window().open_file(filePath)
