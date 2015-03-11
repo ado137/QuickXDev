@@ -207,6 +207,7 @@ def run_player_with_path(parent, quick_cocos2dx_root, script_path):
 						args.append("-console")
 					else:
 						args.append("-disable-console")
+						args.append("-disable-write-debug-log")
 						# args.append("-write-debug-log")
 						# args.append("-console")
 				# resolution
