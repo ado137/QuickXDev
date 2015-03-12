@@ -274,17 +274,17 @@ def run_player_with_path(parent, quick_cocos2dx_root, script_path):
 		f.close()
 		args.append("-size")
 		args.append(width+"x"+height)
-	if parent.process:
-		try:
-			parent.process.terminate()
-		except Exception:
-			pass
+	# if parent.process:
+	# 	try:
+	# 		parent.process.terminate()
+	# 	except Exception:
+	# 		pass
 	if sublime.platform()=="osx":
-		parent.process=subprocess.Popen(args, stdout = subprocess.PIPE)
+		subprocess.Popen(args, stdout = subprocess.PIPE)
 
-		parent.view = parent.view.window().open_file(workdir+"/debug.log")
-		parent.view.set_syntax_file("Packages/Java/Java.tmLanguage")
-		parent.view.set_scratch(True)
+		view = parent.view.window().open_file(workdir+"/debug.log")
+		view.set_syntax_file("Packages/Java/Java.tmLanguage")
+		# parent.view.set_scratch(True)
 		# parent.view.set_read_only(True)
 		# parent.view.show()
 		# parent.panel = OutputPanel(parent.view.window(), "get_class_sign", parent.view.settings().get('color_scheme'), "Packages/Java/Java.tmLanguage")
@@ -300,7 +300,7 @@ def run_player_with_path(parent, quick_cocos2dx_root, script_path):
 		# t1 = Thread(target=print_subprocess_stdout,args=(parent.process,call_func,0.01))#指定目标函数，传入参数，这里参数也是元组
 		# t1.start()
 	elif sublime.platform()=="windows":
-		parent.process=subprocess.Popen(args)
+		subprocess.Popen(args)
 
 
 class LuaNewFileCommand(sublime_plugin.WindowCommand):
