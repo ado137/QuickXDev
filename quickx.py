@@ -65,7 +65,6 @@ def getProjectRootPath(filepath):
 
 	if not filepath:
 		return root_path
-		
 	keys = ("proj.android/","proj.ios/","proj.mac/","proj.win32/","res/","scripts/","sources/")
 	for key in keys:
 		find_index = filepath.find(key)
@@ -174,25 +173,41 @@ class InsertMyText(sublime_plugin.TextCommand):
 		self.view.insert(edit, self.view.size(), args['text'])
 
 
-class MySpecialDoubleclickCommand(sublime_plugin.TextCommand):
-	def run(self, edit):
-		pass
-		# file_path, file_name = os.path.split(self.view.file_name())
-		# print(file_path, edit)
-		# line = ""
-		# for region in self.view.sel():
-		# 	if not region.empty():
-		# 		line = self.view.substr(self.view.line(region.a))
-		# 		break
 
-		# print("line:",line)
-		# self.view.window().open_file("/Volumes/DATA/quickx-utils/autolayout/tests/debug.log:20",sublime.ENCODED_POSITION)
-		# if file_name == "debug.log":
-		# 	# print(args)
-		# 	pass
-		# else:
-		# 	# self.view.run_command("expand_selection", {"to": "word"}) 
-		# 	pass
+
+class MySpecialDoubleclickCommand(sublime_plugin.TextCommand):
+	def pauseLine(self, line):
+		filename = ""
+		fileline = 1
+		if line.find("dump from:") != -1:
+			key1 = ".lua\"]:"
+			key2 = "dump from: [string \""
+			pos1 = line.find(key1)
+			pos2 = pos1 + len(key1)
+			filename = line[:pos1].replace(key2,"")+".lua"
+			fileline = line[pos2:line.find(":",pos2)]
+			print("filename:",filename)
+			print("fileline:",fileline)
+
+			return True,filename+":"+fileline
+
+		return False
+	def run(self, edit):
+		if not self.view.file_name():
+			return
+		file_path, file_name = os.path.split(self.view.file_name())
+		if file_name == "debug.log":
+			print(file_path, edit)
+			line = ""
+			for region in self.view.sel():
+				if not region.empty():
+					line = self.view.substr(self.view.line(region.a))
+					break
+
+			print("line:",line)
+			re,filename = self.pauseLine(line)
+			if re:
+				self.view.window().open_file(filename,sublime.ENCODED_POSITION)
 
 
 def run_player_with_path(parent, quick_cocos2dx_root, script_path):
