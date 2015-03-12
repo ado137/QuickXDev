@@ -179,19 +179,29 @@ class MySpecialDoubleclickCommand(sublime_plugin.TextCommand):
 	def pauseLine(self, line):
 		filename = ""
 		fileline = 1
-		if line.find("dump from:") != -1:
-			key1 = ".lua\"]:"
-			key2 = "dump from: [string \""
-			pos1 = line.find(key1)
-			pos2 = pos1 + len(key1)
-			filename = line[:pos1].replace(key2,"")+".lua"
-			fileline = line[pos2:line.find(":",pos2)]
-			print("filename:",filename)
-			print("fileline:",fileline)
+		keyHead = "[string \""
+		posHeadStart = line.find(keyHead)
+		if posHeadStart == -1:
+			return False,""
 
-			return True,filename+":"+fileline
+		posHeadEnd = posHeadStart + len(keyHead)
 
-		return False
+		key = ".lua\"]:"
+		posKeyStart = line.find(key,posHeadStart)
+		
+		if posHeadStart == -1:
+			return False,""
+
+		posKeyEnd = posKeyStart + len(key)
+
+		filename = line[posHeadEnd:posKeyStart]+".lua"
+		fileline = line[posKeyEnd:line.find(":",posKeyEnd)]
+
+		# print("filename:",filename)
+		# print("fileline:",fileline)
+
+		return True, filename+":"+fileline
+
 	def run(self, edit):
 		if not self.view.file_name():
 			return
