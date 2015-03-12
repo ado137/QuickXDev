@@ -62,6 +62,10 @@ def checkRoot():
 
 def getProjectRootPath(filepath):
 	root_path = ""
+
+	if not filepath:
+		return root_path
+		
 	keys = ("proj.android/","proj.ios/","proj.mac/","proj.win32/","res/","scripts/","sources/")
 	for key in keys:
 		find_index = filepath.find(key)
@@ -172,22 +176,23 @@ class InsertMyText(sublime_plugin.TextCommand):
 
 class MySpecialDoubleclickCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
-		file_path, file_name = os.path.split(self.view.file_name())
-		print(file_path, edit)
-		line = ""
-		for region in self.view.sel():
-			if not region.empty():
-				line = self.view.substr(self.view.line(region.a))
-				break
+		pass
+		# file_path, file_name = os.path.split(self.view.file_name())
+		# print(file_path, edit)
+		# line = ""
+		# for region in self.view.sel():
+		# 	if not region.empty():
+		# 		line = self.view.substr(self.view.line(region.a))
+		# 		break
 
-		print("line:",line)
-		self.view.window().open_file("/Volumes/DATA/quickx-utils/autolayout/tests/debug.log:20",sublime.ENCODED_POSITION)
-		if file_name == "debug.log":
-			# print(args)
-			pass
-		else:
-			# self.view.run_command("expand_selection", {"to": "word"}) 
-			pass
+		# print("line:",line)
+		# self.view.window().open_file("/Volumes/DATA/quickx-utils/autolayout/tests/debug.log:20",sublime.ENCODED_POSITION)
+		# if file_name == "debug.log":
+		# 	# print(args)
+		# 	pass
+		# else:
+		# 	# self.view.run_command("expand_selection", {"to": "word"}) 
+		# 	pass
 
 
 def run_player_with_path(parent, quick_cocos2dx_root, script_path):
@@ -203,8 +208,9 @@ def run_player_with_path(parent, quick_cocos2dx_root, script_path):
 	args=[playerPath]
 	# param
 	path=script_path
+	workdir = os.path.split(path)[0]
 	args.append("-workdir")
-	args.append(os.path.split(path)[0])
+	args.append(workdir)
 	args.append("-file")
 	args.append("scripts/main.lua")
 	args.append("-load-framework")
@@ -251,9 +257,10 @@ def run_player_with_path(parent, quick_cocos2dx_root, script_path):
 	if sublime.platform()=="osx":
 		parent.process=subprocess.Popen(args, stdout = subprocess.PIPE)
 
-		parent.view = parent.view.window().new_file()
+		parent.view = parent.view.window().open_file(workdir+"/debug.log")
 		parent.view.set_syntax_file("Packages/Java/Java.tmLanguage")
-		parent.view.set_name("debug.log")
+		parent.view.set_scratch(True)
+		# parent.view.set_read_only(True)
 		# parent.view.show()
 		# parent.panel = OutputPanel(parent.view.window(), "get_class_sign", parent.view.settings().get('color_scheme'), "Packages/Java/Java.tmLanguage")
 		# parent.panel.show()ch
