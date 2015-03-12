@@ -258,9 +258,9 @@ def run_player_with_path(parent, quick_cocos2dx_root, script_path):
 						args.append("-disable-write-debug-log")
 						args.append("-console")
 					else:
-						args.append("-disable-console")
-						args.append("-disable-write-debug-log")
-						# args.append("-write-debug-log")
+						# args.append("-disable-console")
+						# args.append("-disable-write-debug-log")
+						args.append("-write-debug-log")
 						# args.append("-console")
 				# resolution
 				m=re.match("^CONFIG_SCREEN_WIDTH\s*=\s*(\d+)",line)
@@ -290,14 +290,15 @@ def run_player_with_path(parent, quick_cocos2dx_root, script_path):
 		# parent.panel = OutputPanel(parent.view.window(), "get_class_sign", parent.view.settings().get('color_scheme'), "Packages/Java/Java.tmLanguage")
 		# parent.panel.show()ch
 
-		def call_func(msg):
+		# def call_func(msg):
+			# print("parent.process.poll:",parent.process.poll())
 			# print(msg)
-			parent.view.run_command("insert_my_text", {"args":{'text':msg}})
-			parent.view.show(parent.view.size())
+		# 	parent.view.run_command("insert_my_text", {"args":{'text':msg}})
+		# 	parent.view.show(parent.view.size())
 
 
-		t1 = Thread(target=print_subprocess_stdout,args=(parent.process,call_func,0.00))#指定目标函数，传入参数，这里参数也是元组
-		t1.start()
+		# t1 = Thread(target=print_subprocess_stdout,args=(parent.process,call_func,0.01))#指定目标函数，传入参数，这里参数也是元组
+		# t1.start()
 	elif sublime.platform()=="windows":
 		parent.process=subprocess.Popen(args)
 
