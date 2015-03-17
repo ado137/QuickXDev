@@ -274,34 +274,12 @@ def run_player_with_path(parent, quick_cocos2dx_root, script_path):
 		f.close()
 		args.append("-size")
 		args.append(width+"x"+height)
-	# if parent.process:
-	# 	try:
-	# 		parent.process.terminate()
-	# 	except Exception:
-	# 		pass
 	if sublime.platform()=="osx":
-		subprocess.Popen(args, stdout = subprocess.PIPE)
-
-		view = parent.view.window().open_file(workdir+"/debug.log")
-		view.set_syntax_file("Packages/Java/Java.tmLanguage")
-		# parent.view.set_scratch(True)
-		# parent.view.set_read_only(True)
-		# parent.view.show()
-		# parent.panel = OutputPanel(parent.view.window(), "get_class_sign", parent.view.settings().get('color_scheme'), "Packages/Java/Java.tmLanguage")
-		# parent.panel.show()ch
-
-		# def call_func(msg):
-			# print("parent.process.poll:",parent.process.poll())
-			# print(msg)
-		# 	parent.view.run_command("insert_my_text", {"args":{'text':msg}})
-		# 	parent.view.show(parent.view.size())
-
-
-		# t1 = Thread(target=print_subprocess_stdout,args=(parent.process,call_func,0.01))#指定目标函数，传入参数，这里参数也是元组
-		# t1.start()
+		subprocess.Popen(args)
 	elif sublime.platform()=="windows":
 		subprocess.Popen(args)
 
+	view = parent.view.window().open_file(workdir+"/debug.log")
 
 class LuaNewFileCommand(sublime_plugin.WindowCommand):
 	def run(self, dirs):
@@ -573,10 +551,12 @@ class QuickxGetClassSignCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
 		file_path = self.view.file_name()
 		head, tail = os.path.split(file_path)
-		print(head)
-		print(tail)
 		file_name = tail.replace(".java","")
-		classes_apth = head.replace("proj.android/src/","proj.android/bin/classes/")
+
+		classes_apth = head.replace("proj.android_studio/app/src/","proj.android_studio/app/build/intermediates/classes/").replace("/java/com/","/release/com/")
+		if not os.path.isdir(classes_apth):
+			classes_apth = head.replace("proj.android/src/","proj.android/bin/classes/")
+
 		print(file_name)
 		print(classes_apth)
 		args=["javap", "-s", "-p", "-classpath", classes_apth, file_name]
@@ -659,6 +639,11 @@ class QuickxCompileScriptsCommand(sublime_plugin.WindowCommand):
 class QuickxListener(sublime_plugin.EventListener):
 	def __init__(self):
 		self.lastTime=0
+
+	def on_load(self, view):
+		print(view.file_name())
+		if view.file_name().find("debug.log") != -1:
+			view.set_syntax_file("Packages/Java/Java.tmLanguage")
 
 	def on_post_save(self, view):
 		filename=view.file_name()
