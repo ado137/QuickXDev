@@ -173,10 +173,8 @@ class InsertMyText(sublime_plugin.TextCommand):
 		self.view.insert(edit, self.view.size(), args['text'])
 
 
-
-
 class MySpecialDoubleclickCommand(sublime_plugin.TextCommand):
-	def pauseLuaError(self, line):
+	def parseLuaError(self, line):
 		key = ".lua:"
 		posKeyStart = line.find(key)
 		if posKeyStart == -1:
@@ -185,12 +183,10 @@ class MySpecialDoubleclickCommand(sublime_plugin.TextCommand):
 		filename = line[:posKeyStart].strip(" \t")+".lua"
 		fileline = line[posKeyEnd:line.find(":",posKeyEnd)]
 
-		print("filename:",filename)
-		print("fileline:",fileline)
 		return True, filename+":"+fileline
 
 
-	def pauseCocosErrorAndDump(self, line):
+	def parseCocosErrorAndDump(self, line):
 		filename = ""
 		fileline = 1
 		keyHead = "[string \""
@@ -213,12 +209,12 @@ class MySpecialDoubleclickCommand(sublime_plugin.TextCommand):
 
 		return True, filename+":"+fileline
 
-	def pauseLine(self, line):
-		re,string = self.pauseCocosErrorAndDump(line)
+	def parseLine(self, line):
+		re,string = self.parseCocosErrorAndDump(line)
 		if re:
 			return re,string
 
-		return self.pauseLuaError(line)
+		return self.parseLuaError(line)
 
 
 	def run(self, edit):
@@ -233,7 +229,7 @@ class MySpecialDoubleclickCommand(sublime_plugin.TextCommand):
 					line = self.view.substr(self.view.line(region.a))
 					break
 
-			re,filename = self.pauseLine(line)
+			re,filename = self.parseLine(line)
 			if re:
 				self.view.window().open_file(filename,sublime.ENCODED_POSITION)
 
