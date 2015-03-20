@@ -178,12 +178,12 @@ class MySpecialDoubleclickCommand(sublime_plugin.TextCommand):
 		key = ".lua:"
 		posKeyStart = line.find(key)
 		if posKeyStart == -1:
-			return False,""
+			return False
 		posKeyEnd = posKeyStart + len(key)
 		filename = line[:posKeyStart].strip(" \t")+".lua"
 		fileline = line[posKeyEnd:line.find(":",posKeyEnd)]
 
-		return True, filename+":"+fileline
+		return True, filename, fileline
 
 
 	def parseCocosErrorAndDump(self, line):
@@ -207,14 +207,17 @@ class MySpecialDoubleclickCommand(sublime_plugin.TextCommand):
 		filename = line[posHeadEnd:posKeyStart]+".lua"
 		fileline = line[posKeyEnd:line.find(":",posKeyEnd)]
 
-		return True, filename+":"+fileline
+		return True, filename, fileline
 
 	def parseLine(self, line):
-		re,string = self.parseCocosErrorAndDump(line)
-		if re:
-			return re,string
+		re,name,line = self.parseCocosErrorAndDump(line)
+		if not re:
+			re,name,line = self.parseLuaError(line)
 
-		return self.parseLuaError(line)
+		if not re:
+			return False
+
+		return os.path.isfile(name), name+":"+line
 
 
 	def run(self, edit):
