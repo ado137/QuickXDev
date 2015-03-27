@@ -58,6 +58,14 @@ def checkRoot():
 		return False
 	return quick_cocos2dx_root
 
+def checkPlayerPath():
+	# quick_cocos2dx_root
+	settings = helper.loadSettings("QuickXDev")
+	player_path = settings.get("player_path", "")
+	if len(player_path)==0:
+		sublime.error_message("player_path no set")
+		return False
+	return player_path
 
 
 def getProjectRootPath(filepath):
@@ -237,16 +245,23 @@ class MySpecialDoubleclickCommand(sublime_plugin.TextCommand):
 				self.view.window().open_file(filename,sublime.ENCODED_POSITION)
 
 
-def run_player_with_path(parent, quick_cocos2dx_root, script_path):
-	# player path for platform
-	playerPath=""
-	if sublime.platform()=="osx":
-		playerPath=quick_cocos2dx_root+"/player/bin/mac/quick-x-player.app/Contents/MacOS/quick-x-player"
-	elif sublime.platform()=="windows":
-		playerPath=quick_cocos2dx_root+"/player/bin/win/quick-x-player.exe"
-	if playerPath=="" or not os.path.exists(playerPath):
-		sublime.error_message("player no exists")
+def run_player_with_path(parent, script_path):
+	# quick_cocos2dx_root
+	quick_cocos2dx_root = checkRoot()
+	if not quick_cocos2dx_root:
 		return
+
+	# player_path
+	player_path = checkPlayerPath()
+	if not player_path:
+		return
+
+	# player path for platform
+	playerPath=quick_cocos2dx_root+"/"+player_path
+	if not os.path.isfile(playerPath):
+		sublime.error_message("player no exists:"+playerPath)
+		return
+		
 	args=[playerPath]
 	# param
 	path=script_path
@@ -348,12 +363,7 @@ class QuickxSmartRunWithPlayerCommand(sublime_plugin.TextCommand):
 			sublime.error_message("makesure the file '{0}' in your quickx project!".format(file_path))
 			return
 
-		# root
-		quick_cocos2dx_root = checkRoot()
-		if not quick_cocos2dx_root:
-			return
-
-		run_player_with_path(self, quick_cocos2dx_root, project_root+"/scripts")
+		run_player_with_path(self, project_root+"/scripts")
 
 
 class QuickxRunWithPlayerCommand(sublime_plugin.WindowCommand):
@@ -362,12 +372,7 @@ class QuickxRunWithPlayerCommand(sublime_plugin.WindowCommand):
 		self.process=None
 
 	def run(self, dirs):
-		# root
-		quick_cocos2dx_root = checkRoot()
-		if not quick_cocos2dx_root:
-			return
-
-		run_player_with_path(self, quick_cocos2dx_root, dirs[0])
+		run_player_with_path(self, dirs[0])
 
 
 	def is_enabled(self, dirs):
