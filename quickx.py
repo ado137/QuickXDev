@@ -265,12 +265,14 @@ def run_player_with_path(parent, script_path):
 	args=[playerPath]
 	# param
 	path=script_path
-	workdir = os.path.split(path)[0]
+	path_split = os.path.split(path)
+	workdir = path_split[0]
+	print(os.path.split(path))
 	args.append("-workdir")
 	args.append(workdir)
 	args.append("-file")
-	args.append("scripts/main.lua")
-	args.append("-load-framework")
+	args.append(os.path.join(path_split[1],"main.lua"))
+	# args.append("-load-framework")
 	configPath=path+"/config.lua"
 	if os.path.exists(configPath):
 		f=codecs.open(configPath,"r","utf-8")

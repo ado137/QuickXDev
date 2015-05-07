@@ -2,7 +2,7 @@
     // quick_cocos2dx_root
     "quick_cocos2dx_root": "",
     // the player path relative $quick_cocos2dx_root
-    "player_path": "player/mac/player.app/Contents/MacOS/player",
+    "player_path": "",
     // you name and email
     "author": "Your Name",
     // lua template attributes
