@@ -68,6 +68,27 @@ def checkPlayerPath():
 	return player_path
 
 
+def getScriptsRootPath(filepath):
+	root_path = ""
+
+	if not filepath:
+		return root_path
+	keys = ("proj.android/","proj.ios/","proj.mac/","proj.win32/","res/","scripts/","src/","sources/")
+	for key in keys:
+		find_index = filepath.find(key)
+		if find_index != -1:
+			root_path = filepath[:find_index - 1]
+			if os.path.isfile(root_path+"/scripts/main.lua"):
+				root_path = root_path+"/scripts"
+				break
+			elif os.path.isfile(root_path+"/src/main.lua"):
+				root_path = root_path+"/src"
+				break
+
+			root_path = ""
+
+	return root_path
+
 def getProjectRootPath(filepath):
 	root_path = ""
 
@@ -360,12 +381,12 @@ class QuickxSmartRunWithPlayerCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
 		# find script path
 		file_path = self.view.file_name()
-		project_root = getProjectRootPath(file_path)
-		if project_root == "":
+		script_path = getScriptsRootPath(file_path)
+		if script_path == "":
 			sublime.error_message("makesure the file '{0}' in your quickx project!".format(file_path))
 			return
 
-		run_player_with_path(self, project_root+"/scripts")
+		run_player_with_path(self, script_path)
 
 
 class QuickxRunWithPlayerCommand(sublime_plugin.WindowCommand):
