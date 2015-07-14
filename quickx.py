@@ -293,7 +293,7 @@ def run_player_with_path(parent, script_path):
 	args.append(workdir)
 	args.append("-file")
 	args.append(os.path.join(path_split[1],"main.lua"))
-	# args.append("-load-framework")
+	args.append("-load-framework")
 	configPath=path+"/config.lua"
 	if os.path.exists(configPath):
 		f=codecs.open(configPath,"r","utf-8")
@@ -625,6 +625,24 @@ class QuickxGetClassSignCommand(sublime_plugin.TextCommand):
 	def is_enabled(self):
 		return helper.checkFileExt(self.view.file_name(),"java")
 
+
+class QuickxGetReqrirePathCommand(sublime_plugin.TextCommand):
+	def run(self, edit):
+		file_path = self.view.file_name()
+		head, tail = os.path.splitext(file_path)
+		path = head.replace("/",".")
+		key = ".src."
+		pos = path.find(key)
+		if pos != -1:
+			path = path[pos+len(key):]
+			print(path)
+			p = subprocess.Popen(['pbcopy'], stdin=subprocess.PIPE)
+			p.stdin.write(bytes(path, 'UTF-8'))
+			p.stdin.close()
+
+
+	def is_enabled(self):
+		return helper.checkFileExt(self.view.file_name(),"lua")
 
 
 class QuickxCompileScriptsCommand(sublime_plugin.WindowCommand):
