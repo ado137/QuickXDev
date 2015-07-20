@@ -310,7 +310,7 @@ def run_player_with_path(parent, script_path):
 						args.append("-disable-write-debug-log")
 						args.append("-disable-console")
 					elif debug=="1":
-						args.append("-disable-write-debug-log")
+						args.append("-write-debug-log")
 						args.append("-console")
 					else:
 						# args.append("-disable-console")
