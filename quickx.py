@@ -226,7 +226,7 @@ class MySpecialDoubleclickCommand(sublime_plugin.TextCommand):
 		keyHead = "[string \""
 		posHeadStart = line.find(keyHead)
 		if posHeadStart == -1:
-			return False,""
+			return False,"",0
 
 		posHeadEnd = posHeadStart + len(keyHead)
 
@@ -234,7 +234,7 @@ class MySpecialDoubleclickCommand(sublime_plugin.TextCommand):
 		posKeyStart = line.find(key,posHeadStart)
 		
 		if posHeadStart == -1:
-			return False,""
+			return False,"",0
 
 		posKeyEnd = posKeyStart + len(key)
 
@@ -243,14 +243,14 @@ class MySpecialDoubleclickCommand(sublime_plugin.TextCommand):
 
 		return True, filename, fileline
 
-	def parseLine(self, line):
+	def parseLine(self, line, file_path):
 		re,name,line = self.parseCocosErrorAndDump(line)
 		if not re:
 			re,name,line = self.parseLuaError(line)
 
 		if not re:
 			return False
-
+		name = os.path.join(file_path,"src",name)
 		return os.path.isfile(name), name+":"+line
 
 
@@ -259,14 +259,13 @@ class MySpecialDoubleclickCommand(sublime_plugin.TextCommand):
 			return
 		file_path, file_name = os.path.split(self.view.file_name())
 		if file_name == "debug.log":
-			print(file_path, edit)
 			line = ""
 			for region in self.view.sel():
 				if not region.empty():
 					line = self.view.substr(self.view.line(region.a))
 					break
 
-			re,filename = self.parseLine(line)
+			re,filename = self.parseLine(line, file_path)
 			if re:
 				self.view.window().open_file(filename,sublime.ENCODED_POSITION)
 
