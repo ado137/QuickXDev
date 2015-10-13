@@ -202,6 +202,11 @@ class InsertMyText(sublime_plugin.TextCommand):
 		self.view.insert(edit, self.view.size(), args['text'])
 
 
+class QuickxListSameFileCommand(sublime_plugin.TextCommand):
+	def run(self, edit):
+		file_path, file_name = os.path.split(self.view.file_name())
+		self.view.window().run_command("show_overlay",{"overlay": "goto", "show_files": True, "text":file_name})
+
 class MySpecialDoubleclickCommand(sublime_plugin.TextCommand):
 	def parseLuaError(self, line):
 		key = ".lua:"
