@@ -2,5 +2,5 @@
     { "keys": ["ctrl+shift+g"], "command": "quickx_goto_definition" },
 	{ "keys": ["super+ctrl+r"], "command": "quickx_smart_run_with_player" },
     { "keys": ["super+ctrl+b"], "command": "quickx_run_with_android" },
-    { "keys": ["super+shift+e"], "command": "quickx_list_same_file" }
+    { "keys": ["ctrl+r"], "command": "quickx_list_same_file" }
 ]
