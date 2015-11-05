@@ -1,6 +1,7 @@
 [
     { "keys": ["ctrl+shift+g"], "command": "quickx_goto_definition" },
-	{ "keys": ["super+ctrl+r"], "command": "quickx_smart_run_with_player" },
+	{ "keys": ["super+q", "super+r"], "command": "quickx_smart_run_with_player" },
     { "keys": ["super+ctrl+b"], "command": "quickx_run_with_android" },
-    { "keys": ["ctrl+r"], "command": "quickx_list_same_file" }
+    { "keys": ["ctrl+r"], "command": "quickx_list_same_file" },
+    { "keys": ["super+q", "super+d"], "command": "qucikx_open_debug_log" }
 ]

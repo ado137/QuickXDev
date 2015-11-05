@@ -94,12 +94,12 @@ def getProjectRootPath(filepath):
 
 	if not filepath:
 		return root_path
-	keys = ("proj.android/","proj.ios/","proj.mac/","proj.win32/","res/","scripts/","sources/")
+	keys = ("proj.android/","proj.ios/","proj.mac/","proj.win32/","res/","src/","scripts/","sources/")
 	for key in keys:
 		find_index = filepath.find(key)
 		if find_index != -1:
 			root_path = filepath[:find_index - 1]
-			if os.path.isfile(root_path+"/scripts/main.lua"):
+			if os.path.isfile(root_path+"/src/main.lua"):
 				break
 
 			root_path = ""
@@ -206,6 +206,13 @@ class QuickxListSameFileCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
 		file_path, file_name = os.path.split(self.view.file_name())
 		self.view.window().run_command("show_overlay",{"overlay": "goto", "show_files": True, "text":file_name})
+
+class QucikxOpenDebugLogCommand(sublime_plugin.TextCommand):
+	def run(self, edit):
+		file_path = self.view.file_name()
+		project_root = getProjectRootPath(file_path)
+		if project_root != "":
+			self.view.window().open_file(project_root+"/debug.log")
 
 class MySpecialDoubleclickCommand(sublime_plugin.TextCommand):
 	def parseLuaError(self, line):
