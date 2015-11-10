@@ -214,6 +214,15 @@ class QucikxOpenDebugLogCommand(sublime_plugin.TextCommand):
 		if project_root != "":
 			self.view.window().open_file(project_root+"/debug.log")
 
+
+class QucikxOpenProjectRootCommand(sublime_plugin.TextCommand):
+	def run(self, edit):
+		file_path = self.view.file_name()
+		project_root = getProjectRootPath(file_path)
+		if project_root != "":
+			self.view.window().run_command("open_dir",{"dir": project_root})
+
+
 class MySpecialDoubleclickCommand(sublime_plugin.TextCommand):
 	def parseLuaError(self, line):
 		key = ".lua:"
