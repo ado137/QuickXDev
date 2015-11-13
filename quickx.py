@@ -212,7 +212,14 @@ class QucikxOpenDebugLogCommand(sublime_plugin.TextCommand):
 		file_path = self.view.file_name()
 		project_root = getProjectRootPath(file_path)
 		if project_root != "":
-			self.view.window().open_file(project_root+"/debug.log")
+			file_name = project_root+"/debug.log"
+			window = self.view.window()
+			view = window.find_open_file(file_name)
+			if view:
+				window.focus_view(view)
+				window.run_command("close")
+			self.view.window().open_file(file_name)
+
 
 
 class QucikxOpenProjectRootCommand(sublime_plugin.TextCommand):
@@ -354,7 +361,7 @@ def run_player_with_path(parent, script_path):
 	elif sublime.platform()=="windows":
 		subprocess.Popen(args)
 
-	view = parent.view.window().open_file(workdir+"/debug.log")
+	# view = parent.view.window().open_file(workdir+"/debug.log")
 
 class LuaNewFileCommand(sublime_plugin.WindowCommand):
 	def run(self, dirs):
