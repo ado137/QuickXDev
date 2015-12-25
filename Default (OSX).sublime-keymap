@@ -5,5 +5,6 @@
     { "keys": ["ctrl+r"], "command": "quickx_list_same_file" },
     { "keys": ["super+q", "super+d"], "command": "qucikx_open_debug_log" },
     { "keys": ["super+q", "super+o"], "command": "qucikx_open_project_root" },
-    { "keys": ["super+q", "super+c"], "command": "quickx_get_reqrire_path" }
+    { "keys": ["super+q", "super+c"], "command": "quickx_get_reqrire_path" },
+    { "keys": ["super+q", "super+g"], "command": "quickx_goto_definition" }
 ]
