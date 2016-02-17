@@ -2,5 +2,6 @@
     { "command": "quickx_goto_definition", "caption": "Goto Definition" },
     { "command": "quickx_get_class_sign", "caption": "Get Class Sign" },
     { "command": "quickx_get_reqrire_path", "caption": "Get Reqrire Path" },
+    { "command": "quickx_open_in_cococs_builder", "caption": "Open In CococsBuilder" },
     { "caption": "-", "id": "end" }
 ]

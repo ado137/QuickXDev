@@ -653,6 +653,13 @@ class QuickxGetClassSignCommand(sublime_plugin.TextCommand):
 	def is_enabled(self):
 		return helper.checkFileExt(self.view.file_name(),"java")
 
+class QuickxOpenInCococsBuilderCommand(sublime_plugin.TextCommand):
+	def run(self, edit):
+		file_path = self.view.file_name()
+		subprocess.Popen(["/usr/bin/open", file_path])
+
+	def is_enabled(self):
+		return helper.checkFileExt(self.view.file_name(),"ccb")
 
 class QuickxGetReqrirePathCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
