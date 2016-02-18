@@ -204,7 +204,9 @@ class InsertMyText(sublime_plugin.TextCommand):
 
 class QuickxListSameFileCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
-		file_path, file_name = os.path.split(self.view.file_name())
+		file_name=self.view.substr(self.view.sel()[0])
+		if len(file_name)==0:
+			_, file_name = os.path.split(self.view.file_name())
 		self.view.window().run_command("show_overlay",{"overlay": "goto", "show_files": True, "text":file_name})
 
 class QucikxOpenDebugLogCommand(sublime_plugin.TextCommand):
